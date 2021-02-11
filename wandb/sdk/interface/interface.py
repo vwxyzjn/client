@@ -8,6 +8,7 @@ Manage backend sender.
 
 import json
 import logging
+import os
 import threading
 import uuid
 
@@ -25,6 +26,8 @@ from wandb.util import (
     maybe_compress_summary,
     WandBJSONEncoderOld,
 )
+
+from . import mp_interface
 
 if wandb.TYPE_CHECKING:  # type: ignore
     import typing as t
@@ -123,16 +126,35 @@ class BackendSender(object):
         pass
 
     def __init__(
-        self, record_q=None, result_q=None, process=None,
+        self, record_q=None, result_q=None, process=None, user_process_id=None,
+        request_addr=None, response_addr=None
     ):
         self.record_q = record_q
         self.result_q = result_q
         self._process = process
+        self._user_process_id = user_process_id
+        self._mp_interface = mp_interface.MPChildInterface(request_addr, response_addr)
         self._run = None
         self._router = None
 
         if record_q and result_q:
             self._router = MessageRouter(record_q, result_q)
+
+        self.record_q._old_put = self.record_q.put
+        self.record_q.put = self._rec_q_put
+
+        self.result_q._old_get = self.result_q.get
+        self.result_q.get = self._res_q_get
+
+    def _rec_q_put(self, rec):
+        if os.getpid() == self._user_process_id:
+            self.record_q._old_put(rec)
+        self._mp_interface.request_q_put(rec)
+
+    def _res_q_get(self):
+        if os.getpid() == self._user_process_id:
+            return self.result_q._old_get()
+        return self._mp_interface.response_q_get()
 
     def _hack_set_run(self, run):
         self._run = run

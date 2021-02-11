@@ -12,7 +12,7 @@ import sys
 
 import wandb
 
-from ..interface import interface
+from ..interface import mp_interface, interface
 from ..internal.internal import wandb_internal
 
 logger = logging.getLogger("wandb")
@@ -92,8 +92,18 @@ class Backend(object):
         elif save_mod_path:
             main_module.__file__ = save_mod_path
 
+        # multiprocessing
+        req_port = mp_interface._get_free_port()
+        resp_port = mp_interface._get_free_port()
+        req_addr = ('localhost', req_port)
+        resp_addr = ('localhost', resp_port)
+        self._mp_interface = mp_interface.MPParentInterface(record_q=self.record_q,
+                                                            record_addr=('localhost', req_addr),
+                                                            response_q=self.result_q,
+                                                            response_addr=resp_addr)
         self.interface = interface.BackendSender(
-            process=self.wandb_process, record_q=self.record_q, result_q=self.result_q,
+            process=self.wandb_process, record_q=self.record_q, result_q=self.result_q, user_process_id=os.getpid(),
+            request_addr=req_addr, response_addr=resp_addr
         )
 
     def server_connect(self):
