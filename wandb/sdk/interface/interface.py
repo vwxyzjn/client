@@ -714,3 +714,4 @@ class BackendSender(object):
 
         if self._router:
             self._router.join()
+        self._mp_interface.close()

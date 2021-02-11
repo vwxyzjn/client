@@ -123,4 +123,5 @@ class Backend(object):
         self.wandb_process.join()
         self.record_q.close()
         self.result_q.close()
+        self._mp_interface.close()
         # No printing allowed from here until redirect restore!!!
