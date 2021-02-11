@@ -98,7 +98,7 @@ class Backend(object):
         req_addr = ('localhost', req_port)
         resp_addr = ('localhost', resp_port)
         self._mp_interface = mp_interface.MPParentInterface(record_q=self.record_q,
-                                                            record_addr=('localhost', req_addr),
+                                                            record_addr=req_addr,
                                                             response_q=self.result_q,
                                                             response_addr=resp_addr)
         self.interface = interface.BackendSender(
