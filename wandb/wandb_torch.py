@@ -81,11 +81,7 @@ class TorchHistory(object):
         self._num_bins = 64
         self._is_cuda_histc_supported = None
         self._jupyter_run = None
-
-        # Used to figure out if wandb.watch() is used on its own, without wandb.log():
-        self._count = 0
-        self._prev_step = history._step
-        self._strategy = None  # update / add
+        self._strategy = "add"  # add / update
 
     def add_log_hooks_to_pytorch_module(
         self,
@@ -263,28 +259,10 @@ class TorchHistory(object):
             bins = torch.Tensor(bins_np)
 
         hist = {name: wandb.Histogram(np_histogram=(tensor.tolist(), bins.tolist()))}
-        if self._strategy == "add":
+        if strategy == "add":
             history._row_add(hist)
-        elif self._strategy == "update":
+        elif strategy == "update":
             history._row_update(hist)
-        elif self._count == 0:
-            history._row_update(hist)
-            if history._step != self._prev_step:
-                # wandb.log() called.
-                self._strategy = "update"
-            else:
-                self._prev_step = history._step
-                self._count = 1
-        elif self._count == 1:
-            if history._step == self._prev_step:
-                # wandb.log() not called.
-                self._strategy = "add"
-                history._flush()
-                history._row_add(hist)
-            else:
-                # wandb.log() called.
-                self._strategy = "update"
-                history._row_update(hist)
 
     def _hook_variable_gradient_stats(self, var, name, log_track):
         """Logs a Variable's gradient's distribution statistics next time backward()

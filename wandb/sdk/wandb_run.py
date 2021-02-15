@@ -927,6 +927,9 @@ class Run(object):
         if any(not isinstance(key, string_types) for key in data.keys()):
             raise ValueError("Key values passed to `wandb.log` must be strings.")
 
+        if self.history._torch:
+            self.history._torch._strategy = "update"
+
         if step is not None:
             # if step is passed in when tensorboard_sync is used we honor the step passed
             # to make decisions about how to close out the history record, but will strip
