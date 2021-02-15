@@ -286,8 +286,6 @@ class TorchHistory(object):
                 self._strategy = "update"
                 history._row_update(hist)
 
-        history._flush()
-
     def _hook_variable_gradient_stats(self, var, name, log_track):
         """Logs a Variable's gradient's distribution statistics next time backward()
         is called on it.
