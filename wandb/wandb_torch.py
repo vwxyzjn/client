@@ -257,10 +257,9 @@ class TorchHistory(object):
             tensor = torch.Tensor(tensor_np)
             bins = torch.Tensor(bins_np)
 
-        history._row_update(
+        history._row_add(
             {name: wandb.Histogram(np_histogram=(tensor.tolist(), bins.tolist()))}
         )
-        history._flush()
 
     def _hook_variable_gradient_stats(self, var, name, log_track):
         """Logs a Variable's gradient's distribution statistics next time backward()
