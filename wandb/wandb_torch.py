@@ -279,6 +279,7 @@ class TorchHistory(object):
             if history._step == self._prev_step:
                 # wandb.log() not called.
                 self._strategy = "add"
+                history._flush()
                 history._row_add(hist)
             else:
                 # wandb.log() called.
