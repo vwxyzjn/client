@@ -81,7 +81,7 @@ class TorchHistory(object):
         self._num_bins = 64
         self._is_cuda_histc_supported = None
         self._jupyter_run = None
-        wandb._define_metric("*", step_metric="global_step")
+        wandb._define_metric("*", step_metric="global_step", step_sync=True)
         self._step = history._step
 
     def add_log_hooks_to_pytorch_module(
