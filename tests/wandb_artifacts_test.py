@@ -13,22 +13,20 @@ import contextlib
 
 
 @contextlib.contextmanager
-def isolated_filesystem(temp_dir=None):
-    # TODO: Remove this method when temp_dir arg is introduced in next click release
+def static_isolated_filesystem(temp_dir="__tmp__"):
+    if not os.path.isdir(temp_dir):
+        os.mkdir(temp_dir)
     cwd = os.getcwd()
-    t = tempfile.mkdtemp(dir=temp_dir)
-    os.chdir(t)
-
+    os.chdir(temp_dir)
     try:
         yield t
     finally:
         os.chdir(cwd)
 
-        if temp_dir is None:
-            try:
-                shutil.rmtree(t)
-            except OSError:
-                pass
+        try:
+            shutil.rmtree(temp_dir)
+        except OSError:
+            pass
 
 
 def mock_boto(artifact, path=False):
@@ -216,9 +214,7 @@ def test_add_reference_local_file(runner):
 
 
 def test_add_reference_local_file_no_checksum(runner):
-    if not os.path.isdir("abcd"):
-        os.mkdir("abcd")
-    with isolated_filesystem(temp_dir="abcd"):
+    with static_isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt", checksum=False)
@@ -229,7 +225,6 @@ def test_add_reference_local_file_no_checksum(runner):
             "ref": "file://file1.txt",
             "size": 5,
         }
-    shutil.rmtree("abcd")
 
 
 def test_add_reference_local_dir(runner):
@@ -263,9 +258,7 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
-    if not os.path.isdir("abcd"):
-        os.mkdir("abcd")
-    with isolated_filesystem(temp_dir="abcd"):
+    with static_isolated_filesystem():
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
         open("nest/file2.txt", "w").write("my")
@@ -292,7 +285,6 @@ def test_add_reference_local_dir_no_checksum(runner):
             "ref": "file://" + os.path.join(os.getcwd(), "nest", "nest", "file3.txt"),
             "size": 4,
         }
-    shutil.rmtree("abcd")
 
 def test_add_reference_local_dir_with_name(runner):
     with runner.isolated_filesystem():
