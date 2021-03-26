@@ -195,7 +195,7 @@ def test_add_reference_local_file(runner):
 
 
 def test_add_reference_local_file_no_checksum(runner):
-    with runner.isolated_filesystem():
+    with runner.isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt", checksum=False)
@@ -239,7 +239,7 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
-    with runner.isolated_filesystem():
+    with runner.isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
         open("nest/file2.txt", "w").write("my")
