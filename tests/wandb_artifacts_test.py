@@ -216,7 +216,7 @@ def test_add_reference_local_file(runner):
 
 
 def test_add_reference_local_file_no_checksum(runner):
-    if not os.isdir("abcd"):
+    if not os.path.isdir("abcd"):
         os.mkdir("abcd")
     with isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
@@ -263,7 +263,7 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
-    if not os.isdir("abcd"):
+    if not os.path.isdir("abcd"):
         os.mkdir("abcd")
     with isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
