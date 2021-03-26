@@ -271,7 +271,7 @@ def test_add_reference_local_dir_with_name(runner):
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://" + os.getcwd(), name="top")
 
-        assert artifact.digest == "41f7b05d9f98e50f4d795e155539a379"
+        assert artifact.digest == "f718baf2d4c910dc6ccd0d9c586fa00f"
         manifest = artifact.manifest.to_manifest_json()
         assert manifest["contents"]["top/file1.txt"] == {
             "digest": "XUFAKrxLKna5cZ2REBfFkg==",
