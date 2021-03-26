@@ -1014,6 +1014,7 @@ class LocalFileHandler(StorageHandler):
                 raise ValueError(
                     'Path "%s" must be a valid file or directory path' % path
                 )
+            print("path=%s, local_path=%s" % (path, local_path))
             return [
                 ArtifactManifestEntry(
                     name or os.path.basename(path), path, size=size, digest=path
