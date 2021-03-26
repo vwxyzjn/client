@@ -19,7 +19,7 @@ def static_isolated_filesystem(temp_dir="__tmp__"):
     cwd = os.getcwd()
     os.chdir(temp_dir)
     try:
-        yield temp
+        yield temp_dir
     finally:
         os.chdir(cwd)
         try:
