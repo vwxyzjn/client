@@ -8,24 +8,6 @@ import wandb.data_types as data_types
 import numpy as np
 import pandas as pd
 import time
-import tempfile
-import contextlib
-
-
-@contextlib.contextmanager
-def static_isolated_filesystem(temp_dir="_tmp"):
-    if not os.path.isdir(temp_dir):
-        os.mkdir(temp_dir)
-    cwd = os.getcwd()
-    os.chdir(temp_dir)
-    try:
-        yield temp_dir
-    finally:
-        os.chdir(cwd)
-        try:
-            shutil.rmtree(temp_dir)
-        except OSError:
-            pass
 
 
 def mock_boto(artifact, path=False):
@@ -213,7 +195,7 @@ def test_add_reference_local_file(runner):
 
 
 def test_add_reference_local_file_no_checksum(runner):
-    with static_isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt", checksum=False)
@@ -271,7 +253,11 @@ def test_add_reference_local_dir_no_checksum(runner):
         assert artifact.digest == "f4133c1eba94db90c39129569f8790fd"
         manifest = artifact.manifest.to_manifest_json()
         print(manifest)
-        assert False
+        assert manifest["contents"]["tmp"] == {
+            "digest": "file://tmp",
+            "ref": "file://tmp",
+            "size": 11,
+        }
 
 
 def test_add_reference_local_dir_with_name(runner):
