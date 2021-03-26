@@ -13,7 +13,7 @@ import contextlib
 
 
 @contextlib.contextmanager
-def static_isolated_filesystem(temp_dir="__tmp__"):
+def static_isolated_filesystem(temp_dir="_tmp"):
     if not os.path.isdir(temp_dir):
         os.mkdir(temp_dir)
     cwd = os.getcwd()
@@ -257,7 +257,7 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
-    with static_isolated_filesystem():
+    with static_isolated_filesystem("_tmp"):
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
         open("nest/file2.txt", "w").write("my")
@@ -265,7 +265,7 @@ def test_add_reference_local_dir_no_checksum(runner):
         open("nest/nest/file3.txt", "w").write("dude")
 
         artifact = wandb.Artifact(type="dataset", name="my-arty")
-        artifact.add_reference("file://" + os.getcwd(), checksum=False)
+        artifact.add_reference("file://_tmp", checksum=False)
 
         assert artifact.digest == "29075793c33e5a2680e484f840ad3242"
         manifest = artifact.manifest.to_manifest_json()
