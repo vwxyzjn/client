@@ -13,7 +13,7 @@ import contextlib
 
 
 @contextlib.contextmanager
-def isolated_filesystem(self, temp_dir=None):
+def isolated_filesystem(temp_dir=None):
     # TODO: Remove this method when temp_dir arg is introduced in next click release
     cwd = os.getcwd()
     t = tempfile.mkdtemp(dir=temp_dir)
