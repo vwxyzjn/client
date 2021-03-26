@@ -27,7 +27,7 @@ def isolated_filesystem(temp_dir=None):
         if temp_dir is None:
             try:
                 shutil.rmtree(t)
-            except OSError:  # noqa: B014
+            except OSError:
                 pass
 
 
@@ -128,7 +128,7 @@ def mock_http(artifact, path=False, headers={}):
 
 
 def test_add_one_file(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         with open("file1.txt", "w") as f:
             f.write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
@@ -143,7 +143,7 @@ def test_add_one_file(runner):
 
 
 def test_add_named_file(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         with open("file1.txt", "w") as f:
             f.write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
@@ -158,7 +158,7 @@ def test_add_named_file(runner):
 
 
 def test_add_new_file(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         with artifact.new_file("file1.txt") as f:
             f.write("hello")
@@ -172,7 +172,7 @@ def test_add_new_file(runner):
 
 
 def test_add_dir(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_dir(".")
@@ -186,7 +186,7 @@ def test_add_dir(runner):
 
 
 def test_add_named_dir(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_dir(".", name="subdir")
@@ -201,7 +201,7 @@ def test_add_named_dir(runner):
 
 
 def test_add_reference_local_file(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt")
@@ -216,6 +216,8 @@ def test_add_reference_local_file(runner):
 
 
 def test_add_reference_local_file_no_checksum(runner):
+    if not os.isdir("abcd"):
+        os.mkdir("abcd")
     with isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
@@ -227,10 +229,11 @@ def test_add_reference_local_file_no_checksum(runner):
             "ref": "file://file1.txt",
             "size": 5,
         }
+    shutil.rmtree("abcd")
 
 
 def test_add_reference_local_dir(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
         open("nest/file2.txt", "w").write("my")
@@ -260,6 +263,8 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
+    if not os.isdir("abcd"):
+        os.mkdir("abcd")
     with isolated_filesystem(temp_dir="abcd"):
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
@@ -287,10 +292,10 @@ def test_add_reference_local_dir_no_checksum(runner):
             "ref": "file://" + os.path.join(os.getcwd(), "nest", "nest", "file3.txt"),
             "size": 4,
         }
-
+    shutil.rmtree("abcd")
 
 def test_add_reference_local_dir_with_name(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         os.mkdir("nest")
         open("nest/file2.txt", "w").write("my")
@@ -321,7 +326,7 @@ def test_add_reference_local_dir_with_name(runner):
 
 
 def test_add_s3_reference_object(runner, mocker):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_boto(artifact)
         artifact.add_reference("s3://my-bucket/my_object.pb")
@@ -337,7 +342,7 @@ def test_add_s3_reference_object(runner, mocker):
 
 
 def test_add_s3_reference_object_with_name(runner, mocker):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_boto(artifact)
         artifact.add_reference("s3://my-bucket/my_object.pb", name="renamed.pb")
@@ -356,7 +361,7 @@ def test_add_s3_reference_object_with_name(runner, mocker):
     sys.version_info >= (3, 9), reason="botocore doesnt support py3.9 yet"
 )
 def test_add_s3_reference_path(runner, mocker, capsys):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_boto(artifact, path=True)
         artifact.add_reference("s3://my-bucket/")
@@ -377,7 +382,7 @@ def test_add_s3_reference_path(runner, mocker, capsys):
     sys.version_info >= (3, 9), reason="botocore doesnt support py3.9 yet"
 )
 def test_add_s3_max_objects(runner, mocker, capsys):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_boto(artifact, path=True)
         with pytest.raises(ValueError):
@@ -385,7 +390,7 @@ def test_add_s3_max_objects(runner, mocker, capsys):
 
 
 def test_add_reference_s3_no_checksum(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         # TODO: Should we require name in this case?
@@ -401,7 +406,7 @@ def test_add_reference_s3_no_checksum(runner):
 
 
 def test_add_gs_reference_object(runner, mocker):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_gcs(artifact)
         artifact.add_reference("gs://my-bucket/my_object.pb")
@@ -417,7 +422,7 @@ def test_add_gs_reference_object(runner, mocker):
 
 
 def test_add_gs_reference_object_with_name(runner, mocker):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_gcs(artifact)
         artifact.add_reference("gs://my-bucket/my_object.pb", name="renamed.pb")
@@ -433,7 +438,7 @@ def test_add_gs_reference_object_with_name(runner, mocker):
 
 
 def test_add_gs_reference_path(runner, mocker, capsys):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_gcs(artifact, path=True)
         artifact.add_reference("gs://my-bucket/")
@@ -451,7 +456,7 @@ def test_add_gs_reference_path(runner, mocker, capsys):
 
 
 def test_add_http_reference_path(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         mock_http(artifact, headers={"ETag": '"abc"', "Content-Length": "256",})
         artifact.add_reference("http://example.com/file1.txt")
@@ -467,7 +472,7 @@ def test_add_http_reference_path(runner):
 
 
 def test_add_reference_named_local_file(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt", name="great-file.txt")
@@ -482,7 +487,7 @@ def test_add_reference_named_local_file(runner):
 
 
 def test_add_reference_unknown_handler(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("ref://example.com/somefile.txt", name="ref")
 
@@ -519,7 +524,7 @@ def test_add_table_from_dataframe(live_mock_server, test_settings):
 def test_add_obj_wbimage_no_classes(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         wb_image = wandb.Image(
             im_path,
@@ -536,7 +541,7 @@ def test_add_obj_wbimage_no_classes(runner):
 def test_add_obj_wbimage(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
         artifact.add(wb_image, "my-image")
@@ -563,7 +568,7 @@ def test_duplicate_wbimage_from_file(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path_1 = os.path.join(test_folder, "..", "assets", "test.png")
     im_path_2 = os.path.join(test_folder, "..", "assets", "test2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_image_1 = wandb.Image(im_path_1)
         wb_image_2 = wandb.Image(im_path_2)
@@ -571,7 +576,7 @@ def test_duplicate_wbimage_from_file(runner):
         artifact.add(wb_image_2, "my-image_2")
         assert len(artifact.manifest.entries) == 4
 
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_image_1 = wandb.Image(im_path_1)
         wb_image_2 = wandb.Image(im_path_1)
@@ -584,7 +589,7 @@ def test_deduplicate_wbimage_from_array(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_data_1 = np.random.rand(300, 300, 3)
     im_data_2 = np.random.rand(300, 300, 3)
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_image_1 = wandb.Image(im_data_1)
         wb_image_2 = wandb.Image(im_data_2)
@@ -592,7 +597,7 @@ def test_deduplicate_wbimage_from_array(runner):
         artifact.add(wb_image_2, "my-image_2")
         assert len(artifact.manifest.entries) == 4
 
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_image_1 = wandb.Image(im_data_1)
         wb_image_2 = wandb.Image(im_data_2)
@@ -607,7 +612,7 @@ def test_deduplicate_wbimagemask_from_array(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_data_1 = np.random.randint(0, 10, (300, 300))
     im_data_2 = np.random.randint(0, 10, (300, 300))
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_imagemask_1 = data_types.ImageMask({"mask_data": im_data_1}, key="test")
         wb_imagemask_2 = data_types.ImageMask({"mask_data": im_data_2}, key="test2")
@@ -615,7 +620,7 @@ def test_deduplicate_wbimagemask_from_array(runner):
         artifact.add(wb_imagemask_2, "my-imagemask_2")
         assert len(artifact.manifest.entries) == 4
 
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="artifact")
         wb_imagemask_1 = data_types.ImageMask({"mask_data": im_data_1}, key="test")
         wb_imagemask_2 = data_types.ImageMask({"mask_data": im_data_1}, key="test2")
@@ -627,7 +632,7 @@ def test_deduplicate_wbimagemask_from_array(runner):
 def test_add_obj_wbimage_classes_obj(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         classes = wandb.Classes([{"id": 0, "name": "person"}])
         wb_image = wandb.Image(im_path, classes=classes)
@@ -653,7 +658,7 @@ def test_add_obj_wbimage_classes_obj(runner):
 def test_add_obj_wbimage_classes_obj_already_added(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         classes = wandb.Classes([{"id": 0, "name": "person"}])
         artifact.add(classes, "my-classes")
@@ -680,7 +685,7 @@ def test_add_obj_wbimage_classes_obj_already_added(runner):
 def test_add_obj_wbimage_image_already_added(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_file(im_path)
         wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
@@ -703,7 +708,7 @@ def test_add_obj_wbimage_image_already_added(runner):
 def test_add_obj_wbtable_images(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     im_path = os.path.join(test_folder, "..", "assets", "2x2.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
         wb_table = wandb.Table(["examples"])
@@ -730,7 +735,7 @@ def test_add_obj_wbtable_images_duplicate_name(runner):
     test_folder = os.path.dirname(os.path.realpath(__file__))
     img_1 = os.path.join(test_folder, "..", "assets", "2x2.png")
     img_2 = os.path.join(test_folder, "..", "assets", "test.png")
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         os.mkdir("dir1")
         shutil.copy(img_1, "dir1/img.png")
         os.mkdir("dir2")
@@ -851,7 +856,7 @@ def test_artifact_finish_distributed_id(runner, live_mock_server, test_settings)
 
 
 def test_add_partition_folder(runner):
-    with isolated_filesystem():
+    with runner.isolated_filesystem():
         table_name = "dataset"
         table_parts_dir = "dataset_parts"
         artifact_name = "simple_dataset"
