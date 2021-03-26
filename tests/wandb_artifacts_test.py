@@ -257,15 +257,16 @@ def test_add_reference_local_dir(runner):
 
 
 def test_add_reference_local_dir_no_checksum(runner):
-    with static_isolated_filesystem("_tmp"):
-        open("file1.txt", "w").write("hello")
-        os.mkdir("nest")
-        open("nest/file2.txt", "w").write("my")
-        os.mkdir("nest/nest")
-        open("nest/nest/file3.txt", "w").write("dude")
+    with runner.isolated_filesystem():
+        os.mkdir("tmp")
+        open("tmp/file1.txt", "w").write("hello")
+        os.mkdir("tmp/nest")
+        open("tmp/nest/file2.txt", "w").write("my")
+        os.mkdir("tmp/nest/nest")
+        open("tmp/nest/nest/file3.txt", "w").write("dude")
 
         artifact = wandb.Artifact(type="dataset", name="my-arty")
-        artifact.add_reference("file://_tmp", checksum=False)
+        artifact.add_reference("file://tmp", checksum=False)
 
         assert artifact.digest == "29075793c33e5a2680e484f840ad3242"
         manifest = artifact.manifest.to_manifest_json()
