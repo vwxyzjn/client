@@ -199,7 +199,7 @@ def test_add_reference_local_file_no_checksum(runner):
         open("file1.txt", "w").write("hello")
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://file1.txt", checksum=False)
-        assert artifact.digest == "955a12ddc5ef762143f72f6d3642d676"
+        assert artifact.digest == "2f66dd01e5aea4af52445f7602fe88a0"
         manifest = artifact.manifest.to_manifest_json()
         assert manifest["contents"]["file1.txt"] == {
             "digest": "file://file1.txt",
@@ -279,7 +279,7 @@ def test_add_reference_local_dir_with_name(runner):
         artifact = wandb.Artifact(type="dataset", name="my-arty")
         artifact.add_reference("file://" + os.getcwd(), name="top")
 
-        assert artifact.digest == "f718baf2d4c910dc6ccd0d9c586fa00f"
+        assert artifact.digest == "41f7b05d9f98e50f4d795e155539a379"
         manifest = artifact.manifest.to_manifest_json()
         assert manifest["contents"]["top/file1.txt"] == {
             "digest": "XUFAKrxLKna5cZ2REBfFkg==",
