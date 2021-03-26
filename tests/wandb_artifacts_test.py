@@ -19,10 +19,9 @@ def static_isolated_filesystem(temp_dir="__tmp__"):
     cwd = os.getcwd()
     os.chdir(temp_dir)
     try:
-        yield t
+        yield temp
     finally:
         os.chdir(cwd)
-
         try:
             shutil.rmtree(temp_dir)
         except OSError:
