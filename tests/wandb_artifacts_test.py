@@ -271,6 +271,7 @@ def test_add_reference_local_dir_no_checksum(runner):
         assert artifact.digest == "f4133c1eba94db90c39129569f8790fd"
         manifest = artifact.manifest.to_manifest_json()
         print(manifest)
+        assert False
 
 
 def test_add_reference_local_dir_with_name(runner):
