@@ -1934,6 +1934,7 @@ class Api(object):
         ]
 
     def set_sweep_state(self, sweep, state, entity=None, project=None):
+        state = state.upper()
         assert state in ("RUNNING", "PAUSED", "CANCELED", "FINISHED")
         s = self.sweep(sweep=sweep, entity=entity, project=project, specs="{}")
         curr_state = s["state"].upper()
