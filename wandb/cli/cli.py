@@ -712,6 +712,7 @@ def sweep(
     if is_state_change_command > 1:
         raise Exception("Only one state flag (stop/cancel/pause/resume) is allowed.")
     elif is_state_change_command == 1:
+        print("=====ok1====")
         sweep_id = config_yaml_or_sweep_id
         api = _get_cling_api()
         if api.api_key is None:
@@ -736,6 +737,7 @@ def sweep(
         wandb.termlog(
             "%s sweep %s." % (ings[state], "%s/%s/%s" % (entity, project, sweep_id))
         )
+        print("=====ok2====")
         getattr(api, "%s_sweep" % state)(sweep_id, entity=entity, project=project)
         wandb.termlog("Done.")
         return
