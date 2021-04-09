@@ -845,7 +845,7 @@ def test_gc(runner):
 
 
 @pytest.mark.parametrize("stop_mode", ["stop", "cancel"])
-def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode, use_runner):
+def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode):
     live_mock_server.set_ctx({"resume": True})
     sweep_config = {
         "name": "My Sweep",
