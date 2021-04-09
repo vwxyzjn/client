@@ -286,7 +286,7 @@ def test_runs_bayes_nan_inf():
     runs = [r1, r2, r3, r4, r5, r6]
     sweep = {'config': sweep_config_2params, 'runs': runs}
     params, info = bs.next_run(sweep)
-    assert params['v1']['value'] == 10 and params['v2']['value'] == 2
+    assert params['v1']['value'] == 6 and params['v2']['value'] == 2
 
 
 sweep_config_2params_categorical = {
