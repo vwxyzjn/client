@@ -844,8 +844,9 @@ def test_gc(runner):
         assert not os.path.exists(run1_dir)
 
 
-@pytest.mark.parametrize("stop_mode", ["--stop", "--cancel"])
-def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode):
+@pytest.mark.parametrize("stop_mode", ["stop", "cancel"])
+@pytest.mark.parametrize("use_runner", [True, False])  # for coverage
+def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode, use_runner):
     live_mock_server.set_ctx({"resume": True})
     sweep_config = {
         "name": "My Sweep",
@@ -854,9 +855,14 @@ def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode):
     }
     sweep_id = wandb.sweep(sweep_config)
     assert sweep_id == "test"
-    runner.invoke(cli.sweep, "--pause", sweep_id)
-    runner.invoke(cli.sweep, "--resume", sweep_id)
-    runner.invoke(cli.sweep, stop_mode, sweep_id)
+    if use_runner:
+        runner.invoke(cli.sweep, "--pause", sweep_id)
+        runner.invoke(cli.sweep, "--resume", sweep_id)
+        runner.invoke(cli.sweep, "--" + stop_mode, sweep_id)
+    else:
+        cli.sweep(pause=True, config_yaml_or_sweep_id=sweep_id)
+        cli.sweep(resume=True, config_yaml_or_sweep_id=sweep_id)
+        cli.sweep(config_yaml_or_sweep_id=sweep_id, **{stop_mode=True})
 
 
 @pytest.mark.skipif(
