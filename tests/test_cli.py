@@ -845,7 +845,6 @@ def test_gc(runner):
 
 
 @pytest.mark.parametrize("stop_mode", ["stop", "cancel"])
-@pytest.mark.parametrize("use_runner", [True, False])  # for coverage
 def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode, use_runner):
     live_mock_server.set_ctx({"resume": True})
     sweep_config = {
@@ -855,15 +854,9 @@ def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode, use_run
     }
     sweep_id = wandb.sweep(sweep_config)
     assert sweep_id == "test"
-    if use_runner:
-        assert runner.invoke(cli.sweep, "--pause", sweep_id).exit_code == 0
-        assert runner.invoke(cli.sweep, "--resume", sweep_id).exit_code == 0
-        assert runner.invoke(cli.sweep, "--" + stop_mode, sweep_id).exit_code == 0
-    else:
-        cli.sweep(pause=True, config_yaml_or_sweep_id=sweep_id)
-        cli.sweep(resume=True, config_yaml_or_sweep_id=sweep_id)
-        cli.sweep(config_yaml_or_sweep_id=sweep_id, **{stop_mode: True})
-
+    assert runner.invoke(cli.sweep, "--pause", sweep_id).exit_code == 0
+    assert runner.invoke(cli.sweep, "--resume", sweep_id).exit_code == 0
+    assert runner.invoke(cli.sweep, "--" + stop_mode, sweep_id).exit_code == 0
 
 @pytest.mark.skipif(
     sys.version_info >= (3, 9), reason="Tensorboard not currently built for 3.9"
