@@ -856,13 +856,13 @@ def test_sweep_pause(runner, live_mock_server, test_settings, stop_mode, use_run
     sweep_id = wandb.sweep(sweep_config)
     assert sweep_id == "test"
     if use_runner:
-        runner.invoke(cli.sweep, "--pause", sweep_id)
-        runner.invoke(cli.sweep, "--resume", sweep_id)
-        runner.invoke(cli.sweep, "--" + stop_mode, sweep_id)
+        assert runner.invoke(cli.sweep, "--pause", sweep_id).exit_code == 0
+        assert runner.invoke(cli.sweep, "--resume", sweep_id).exit_code == 0
+        assert runner.invoke(cli.sweep, "--" + stop_mode, sweep_id).exit_code == 0
     else:
         cli.sweep(pause=True, config_yaml_or_sweep_id=sweep_id)
         cli.sweep(resume=True, config_yaml_or_sweep_id=sweep_id)
-        cli.sweep(config_yaml_or_sweep_id=sweep_id, **{stop_mode=True})
+        cli.sweep(config_yaml_or_sweep_id=sweep_id, **{stop_mode: True})
 
 
 @pytest.mark.skipif(
