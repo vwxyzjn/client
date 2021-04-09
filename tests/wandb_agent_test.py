@@ -74,3 +74,10 @@ def test_agent_ignore_runid(live_mock_server):
 
     assert len(sweep_run_ids) == 1
     assert sweep_run_ids[0] == "mocker-sweep-run-x9"
+
+
+def test_nan_metric(live_mock_server):
+    def train():
+        run = wandb.init()
+        run.log({"loss": 0.9, "val_loss": float("nan"), "acc": float("inf")})
+    wandb.agent("test-sweep-id-3", function=train, count=10)
